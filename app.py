@@ -23,7 +23,8 @@ def load_and_split(filepath):
         loader = TextLoader(filepath)
 
     docs = loader.load()
-    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    # Using chunk_size=2000 to keep chunk count ~50, staying under Google's 100 req/min free API rate limit
+    splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=200)
     splits = splitter.split_documents(docs)
     return splits
 

@@ -22,7 +22,7 @@ def load_and_split(filepath):
     docs = loader.load()
 
     print("Splitting Data into Chunks...")
-    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=200)
     splits = splitter.split_documents(docs)
     print(f"Split {len(splits)} Chunks")
     return splits
