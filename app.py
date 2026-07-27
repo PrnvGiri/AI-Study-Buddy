@@ -29,8 +29,11 @@ def load_and_split(filepath):
 
 
 def create_rag_chain(splits):
-    # Free Cloud API Embeddings (Zero PyTorch overhead, ultra low memory for Render)
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
+    # Google API Embeddings using gemini-embedding-001 & RETRIEVAL_DOCUMENT
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model="models/gemini-embedding-001",
+        task_type="RETRIEVAL_DOCUMENT"
+    )
     vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
     retriever = vectorstore.as_retriever()
 
@@ -59,7 +62,7 @@ Helpful Answer:"""
 
 
 # Load RayOptics.pdf and build RAG Chain on server startup
-print("⏳ Initializing AI Study Buddy vector store with Google API Embeddings...")
+print("⏳ Initializing AI Study Buddy vector store with Google gemini-embedding-001...")
 splits = load_and_split("RayOptics.pdf")
 rag_chain = create_rag_chain(splits)
 print("✅ Study Buddy Web App is Ready!")

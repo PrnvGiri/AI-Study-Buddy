@@ -29,8 +29,11 @@ def load_and_split(filepath):
 
 
 def create_rag_chain(splits):
-    # Free Cloud API Embeddings (Zero PyTorch overhead, ultra low memory)
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
+    # Google API Embeddings using gemini-embedding-001 & RETRIEVAL_DOCUMENT
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model="models/gemini-embedding-001",
+        task_type="RETRIEVAL_DOCUMENT"
+    )
     vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
     retriever = vectorstore.as_retriever()
 
