@@ -1,49 +1,64 @@
-# 🎓 AI Study Buddy (Basic RAG Implementation)
+# 📚 AI Study Buddy (RAG Implementation)
 
-A simple, easy-to-understand Retrieval-Augmented Generation (RAG) program built with **LangChain**, **Chroma DB**, and **Groq LLM**.
+An interactive **Retrieval-Augmented Generation (RAG)** application that converts any document (PDF or Text) into a personalized AI Study Buddy. 
 
-Simply put any document (`.txt`, `.pdf`, `.md`) into the program, and it immediately becomes an interactive AI Study Buddy ready to answer your questions, explain concepts, and quiz you on the study material!
-
----
-
-## 🛠️ Stack & Architecture
-- **LLM**: Groq API (`llama-3.3-70b-versatile`) via `langchain-groq`
-- **Vector Database**: Chroma DB (`langchain-chroma`)
-- **Embeddings**: `all-MiniLM-L6-v2` via `langchain-huggingface` (Runs 100% locally, no extra embedding key required)
-- **Document Chunking**: `RecursiveCharacterTextSplitter` (1000 char chunks, 200 char overlap)
+Built with **LangChain**, **Chroma DB**, **Groq LLM (LLaMA 3.3)**, and a simple **Flask** Web UI.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Features
+- **Document Chunking & Vector Search**: Uses `RecursiveCharacterTextSplitter` and `Chroma DB` for fast semantic retrieval.
+- **Fast Inference**: Powered by Groq's high-speed LLaMA 3.3 70B model.
+- **Local Embeddings**: Uses HuggingFace `all-MiniLM-L6-v2` embeddings locally.
+- **Dual Interface**:
+  - **CLI Script**: [`study_buddy.py`](study_buddy.py) for simple command-line querying.
+  - **Web App**: [`app.py`](app.py) & [`templates/index.html`](templates/index.html) for a web-based interface.
 
-### 1. Get a Free Groq API Key
-1. Go to [Groq Console](https://console.groq.com/keys) and sign up for a free account.
-2. Create an API Key.
-3. Copy `.env.example` to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-4. Add your API Key into `.env`:
-   ```env
-   GROQ_API_KEY=your_actual_groq_api_key_here
-   ```
+---
 
-### 2. Run the Study Buddy
-Run the script with the default sample notes (`sample_notes.txt`):
-```bash
-.venv/bin/python study_buddy.py
+## 📁 Repository Structure
 ```
-
-Or pass your own document (PDF or Text):
-```bash
-.venv/bin/python study_buddy.py /path/to/your_chapter.pdf
+.
+├── app.py                         # Flask Web Server
+├── study_buddy.py                 # Simple CLI RAG Script
+├── RayOptics.pdf                  # Target Document Context
+├── requirements.txt               # Dependencies for deployment
+├── templates/
+│   └── index.html                 # Simple HTML/CSS Frontend
+├── RagImplementation31stMay2026.ipynb # Reference Notebook
+├── DEPLOYMENT.md                  # Render Deployment Guide
+└── README.md                      # Project Documentation
 ```
 
 ---
 
-## 💻 How It Works (4 Basic Steps)
+## 🛠️ Local Setup & Running
 
-1. **Document Loading**: Reads text or PDF file using LangChain's loaders (`TextLoader` / `PyPDFLoader`).
-2. **Text Chunking**: Breaks large documents into small bite-sized chunks so the LLM can search effectively.
-3. **Vector Store (Chroma DB)**: Converts chunks into numerical vector embeddings and saves them locally in `./chroma_db`.
-4. **RAG Retrieval & Response**: When you ask a question, Chroma DB retrieves the top 3 relevant context chunks, and passes them to **Groq LLM (LLaMA 3.3)** to produce an accurate answer based on your notes.
+### 1. Install Dependencies
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 2. Set your Groq API Key
+Copy `.env.example` to `.env` or set the environment variable:
+```bash
+export GROQ_API_KEY="your_groq_api_key"
+```
+
+### 3. Run the App
+- **Command Line (CLI)**:
+  ```bash
+  python study_buddy.py
+  ```
+- **Web Interface**:
+  ```bash
+  python app.py
+  ```
+  Open `http://127.0.0.1:5001` in your web browser.
+
+---
+
+## ☁️ Deployment
+For step-by-step instructions on how to deploy this application for free on Render, check out the **[DEPLOYMENT.md](DEPLOYMENT.md)** guide.
