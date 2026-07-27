@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, jsonify
+import gradio as gr
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -12,8 +12,6 @@ from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
-
-app = Flask(__name__)
 
 
 def load_and_split(filepath):
@@ -56,26 +54,23 @@ Helpful Answer:"""
     return chain
 
 
-# Load RayOptics.pdf and build RAG Chain on server startup
+# Load RayOptics.pdf and build RAG Chain
 print("⏳ Initializing AI Study Buddy vector store...")
 splits = load_and_split("RayOptics.pdf")
 rag_chain = create_rag_chain(splits)
-print("✅ Study Buddy Web App is Ready!")
+print("✅ Study Buddy Gradio App is Ready!")
 
 
-@app.route("/")
-def home():
-    return render_template("index.html")
+def respond(message, history):
+    return rag_chain.invoke(message)
 
 
-@app.route("/ask", methods=["POST"])
-def ask():
-    user_data = request.get_json()
-    user_question = user_data.get("question", "")
-    answer = rag_chain.invoke(user_question)
-    return jsonify({"answer": answer})
-
+demo = gr.ChatInterface(
+    fn=respond,
+    title="📚 AI Study Buddy - Ray Optics 🎓",
+    description="Ask any question regarding the Ray Optics study material!",
+    textbox=gr.Textbox(placeholder="Ask a question regarding Ray Optics...")
+)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    demo.launch(share=True)

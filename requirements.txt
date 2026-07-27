@@ -1,6 +1,5 @@
-# Core Web Framework & Production WSGI Server
-flask
-gunicorn
+# Gradio UI
+gradio
 
 # LangChain & AI Integrations
 langchain
