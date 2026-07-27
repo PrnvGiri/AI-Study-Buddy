@@ -23,22 +23,33 @@ def load_and_split(filepath):
         loader = TextLoader(filepath)
 
     docs = loader.load()
-    # Using chunk_size=2000 to keep chunk count ~50, staying under Google's 100 req/min free API rate limit
     splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=200)
     splits = splitter.split_documents(docs)
     return splits
 
 
-def create_rag_chain(splits):
-    # Google API Embeddings using gemini-embedding-001 & RETRIEVAL_DOCUMENT
+def create_rag_chain(splits, db_dir="./chroma_db"):
     embeddings = GoogleGenerativeAIEmbeddings(
         model="models/gemini-embedding-001",
         task_type="RETRIEVAL_DOCUMENT"
     )
-    vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
-    retriever = vectorstore.as_retriever()
 
-    # LLM using Groq
+    # Reuse existing Chroma DB from disk if available to prevent hitting 429 API quota limits
+    if os.path.exists(db_dir) and len(os.listdir(db_dir)) > 0:
+        print("💾 Loading existing Chroma DB from disk (0 API quota used)...")
+        vectorstore = Chroma(
+            persist_directory=db_dir,
+            embedding_function=embeddings
+        )
+    else:
+        print("⚡ Creating new Chroma DB vector store...")
+        vectorstore = Chroma.from_documents(
+            documents=splits,
+            embedding=embeddings,
+            persist_directory=db_dir
+        )
+
+    retriever = vectorstore.as_retriever()
     llm = ChatGroq(model_name="llama-3.3-70b-versatile", temperature=1)
 
     template = """Answer the question based only on the following context: {context}
@@ -63,7 +74,7 @@ Helpful Answer:"""
 
 
 # Load RayOptics.pdf and build RAG Chain on server startup
-print("⏳ Initializing AI Study Buddy vector store with Google gemini-embedding-001...")
+print("⏳ Initializing AI Study Buddy vector store...")
 splits = load_and_split("RayOptics.pdf")
 rag_chain = create_rag_chain(splits)
 print("✅ Study Buddy Web App is Ready!")
