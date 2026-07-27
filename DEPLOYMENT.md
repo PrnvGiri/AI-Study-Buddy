@@ -38,8 +38,10 @@ Fill in the deployment settings as follows:
 | **Root Directory** | *(leave blank)* |
 | **Runtime** | `Python 3` |
 | **Build Command** | `pip install -r requirements.txt` |
-| **Start Command** | `gunicorn app:app` |
+| **Start Command** | `gunicorn --bind 0.0.0.0:$PORT app:app` |
 | **Instance Type** | `Free` |
+
+> 💡 **Important**: Make sure the **Start Command** is set to `gunicorn --bind 0.0.0.0:$PORT app:app`. This tells Render's internal proxy which port to bind to so port scanning succeeds.
 
 ---
 
@@ -55,11 +57,6 @@ Scroll down to the **Environment Variables** section and click **Add Environment
 ### Step 5: Deploy
 
 1. Click **Create Web Service** at the bottom.
-2. Render will begin pulling your code, installing dependencies from `requirements.txt`, and launching the Gunicorn server.
+2. Render will begin pulling your code, installing dependencies from `requirements.txt`, and launching Gunicorn on `0.0.0.0:$PORT`.
 3. Once the build completes, Render will provide your free HTTPS domain URL:
    `https://ai-study-buddy.onrender.com`
-
----
-
-## 🎉 Verification
-Visit your Render live URL, type a question about `RayOptics.pdf`, and your AI Study Buddy will respond!
