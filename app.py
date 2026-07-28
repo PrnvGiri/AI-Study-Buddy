@@ -1,55 +1,42 @@
 import os
-from flask import Flask, render_template, request, jsonify
+import streamlit as st
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
 
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 
-app = Flask(__name__)
+# Page Configuration
+st.set_page_config(page_title="AI Study Buddy", page_icon="📚", layout="centered")
+
+st.title("📚 AI Study Buddy - Ray Optics 🎓")
+st.caption("Powered by LangChain, Chroma DB & Groq (LLaMA 3.3)")
 
 
-def load_and_split(filepath):
+# Cache RAG setup so document is processed only once on app startup
+@st.cache_resource
+def init_rag_chain(filepath="RayOptics.pdf"):
     if filepath.endswith(".pdf"):
         loader = PyPDFLoader(filepath)
     else:
         loader = TextLoader(filepath)
 
     docs = loader.load()
-    splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=200)
-    splits = splitter.split_documents(docs)
-    return splits
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    splits = text_splitter.split_documents(docs)
 
-
-def create_rag_chain(splits, db_dir="./chroma_db"):
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/gemini-embedding-001",
-        task_type="RETRIEVAL_DOCUMENT"
-    )
-
-    # Reuse existing Chroma DB from disk if available to prevent hitting 429 API quota limits
-    if os.path.exists(db_dir) and len(os.listdir(db_dir)) > 0:
-        print("💾 Loading existing Chroma DB from disk (0 API quota used)...")
-        vectorstore = Chroma(
-            persist_directory=db_dir,
-            embedding_function=embeddings
-        )
-    else:
-        print("⚡ Creating new Chroma DB vector store...")
-        vectorstore = Chroma.from_documents(
-            documents=splits,
-            embedding=embeddings,
-            persist_directory=db_dir
-        )
-
+    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
     retriever = vectorstore.as_retriever()
+
     llm = ChatGroq(model_name="llama-3.3-70b-versatile", temperature=1)
 
     template = """Answer the question based only on the following context: {context}
@@ -73,26 +60,28 @@ Helpful Answer:"""
     return chain
 
 
-# Load RayOptics.pdf and build RAG Chain on server startup
-print("⏳ Initializing AI Study Buddy vector store...")
-splits = load_and_split("RayOptics.pdf")
-rag_chain = create_rag_chain(splits)
-print("✅ Study Buddy Web App is Ready!")
+# Initialize RAG Chain
+rag_chain = init_rag_chain()
 
+# Initialize Chat History in Session State
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {"role": "assistant", "content": "Hello! Ask me any question related to the Ray Optics document!"}
+    ]
 
-@app.route("/")
-def home():
-    return render_template("index.html")
+# Display Chat History
+for msg in st.session_state.messages:
+    st.chat_message(msg["role"]).write(msg["content"])
 
+# User Question Input
+if prompt := st.chat_input("Ask a question about Ray Optics..."):
+    # Store and display user message
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.chat_message("user").write(prompt)
 
-@app.route("/ask", methods=["POST"])
-def ask():
-    user_data = request.get_json()
-    user_question = user_data.get("question", "")
-    answer = rag_chain.invoke(user_question)
-    return jsonify({"answer": answer})
-
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5001))
-    app.run(host="0.0.0.0", port=port)
+    # Generate and display AI Study Buddy response
+    with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+            answer = rag_chain.invoke(prompt)
+            st.write(answer)
+            st.session_state.messages.append({"role": "assistant", "content": answer})

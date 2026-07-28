@@ -1,16 +1,16 @@
-# Core Web Framework & Production WSGI Server
-flask
-gunicorn
+# Streamlit Web App
+streamlit
 
 # LangChain & AI Integrations
 langchain
 langchain-community
 langchain-groq
-langchain-google-genai
 langchain-chroma
+langchain-huggingface
 
-# Vector Database & Free Cloud API Embeddings
+# Vector Database & Local Embeddings
 chromadb
+sentence-transformers
 
 # PDF Parsing & Environment Utilities
 pypdf

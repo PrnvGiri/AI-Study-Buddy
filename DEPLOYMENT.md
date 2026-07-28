@@ -1,69 +1,35 @@
-# ☁️ Deployment Guide: Render
+# ☁️ Deployment Guide: Streamlit
 
-This guide outlines step-by-step instructions for deploying the **AI Study Buddy** Flask web application to **Render** for free.
-
----
-
-## 📋 Prerequisites
-1. A **GitHub account** with access to your repository: [https://github.com/PrnvGiri/AI-Study-Buddy](https://github.com/PrnvGiri/AI-Study-Buddy)
-2. A free **Groq API Key** from [Groq Console](https://console.groq.com/keys)
-3. A free **Google Gemini API Key** from [Google AI Studio](https://aistudio.google.com/app/apikey)
-4. A free **Render account** at [render.com](https://render.com)
+This guide outlines step-by-step instructions for deploying your **AI Study Buddy** Streamlit web application.
 
 ---
 
-## 🛠️ Step-by-Step Instructions
+## 🌟 Method 1: Streamlit Community Cloud (Recommended - 100% Free ⭐)
 
-### Step 1: Log in to Render
-1. Go to [https://render.com](https://render.com) and log in using your **GitHub account**.
+Streamlit offers official **100% free hosting** for Streamlit apps directly from GitHub.
+
+### Step-by-Step Instructions:
+1. Go to **[share.streamlit.io](https://share.streamlit.io)** and log in with your **GitHub account**.
+2. Click **New app**.
+3. Select your repository: `PrnvGiri/AI-Study-Buddy`, Branch: `main`, Main file path: `app.py`.
+4. Click **Advanced settings** -> **Secrets** and add:
+   ```toml
+   GROQ_API_KEY = "your_actual_groq_api_key_here"
+   ```
+5. Click **Deploy!** Your app will be live at a free URL: `https://ai-study-buddy.streamlit.app`.
 
 ---
 
-### Step 2: Create a New Web Service
-1. Click the **New +** button at the top right of the Render Dashboard.
-2. Select **Web Service**.
-3. Choose **Build and deploy from a Git repository**.
-4. Click **Connect** next to your repository: `PrnvGiri/AI-Study-Buddy`.
+## ⚡ Method 2: Render Deployment
 
----
-
-### Step 3: Configure Service Settings
-
-Fill in the deployment settings as follows:
+If deploying to **Render**:
 
 | Setting | Value |
 | :--- | :--- |
-| **Name** | `ai-study-buddy` (or any custom name) |
-| **Region** | Choose nearest (e.g. Oregon, Frankfurt, Singapore) |
-| **Branch** | `main` |
-| **Root Directory** | *(leave blank)* |
 | **Runtime** | `Python 3` |
 | **Build Command** | `pip install -r requirements.txt` |
-| **Start Command** | `gunicorn --bind 0.0.0.0:$PORT app:app` |
-| **Instance Type** | `Free` |
+| **Start Command** | `streamlit run app.py --server.port $PORT --server.address 0.0.0.0` |
 
-> 💡 **Important**: Make sure the **Start Command** is set to `gunicorn --bind 0.0.0.0:$PORT app:app`.
-
----
-
-### Step 4: Add Environment Variables
-
-Scroll down to the **Environment Variables** section and click **Add Environment Variable** for both keys:
-
-1. **Groq Key**:
-   - **Key**: `GROQ_API_KEY`
-   - **Value**: `your_actual_groq_api_key_here`
-
-2. **Google Key**:
-   - **Key**: `GOOGLE_API_KEY`
-   - **Value**: `your_actual_google_api_key_here`
-
----
-
-### Step 5: Deploy
-
-1. Click **Create Web Service** at the bottom.
-2. Render will pull your repository, install the lightweight dependencies from `requirements.txt`, and launch Gunicorn.
-3. Because we use Google API Embeddings instead of heavy PyTorch weights, your app will use **< 50MB of RAM** and run smoothly without memory errors!
-4. Render will provide your free HTTPS domain URL:
-   `https://ai-study-buddy.onrender.com`
+### Environment Variable:
+- **Key**: `GROQ_API_KEY`
+- **Value**: `your_actual_groq_api_key_here`
