@@ -1,8 +1,7 @@
 import os
-import streamlit as st
+import gradio as gr
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
@@ -14,25 +13,20 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 
-# Page Configuration
-st.set_page_config(page_title="AI Study Buddy", page_icon="📚", layout="centered")
 
-st.title("📚 AI Study Buddy - Ray Optics 🎓")
-st.caption("Powered by LangChain, Chroma DB & Groq (LLaMA 3.3)")
-
-
-# Cache RAG setup so document is processed only once on app startup
-@st.cache_resource
-def init_rag_chain(filepath="RayOptics.pdf"):
+def load_and_split(filepath):
     if filepath.endswith(".pdf"):
         loader = PyPDFLoader(filepath)
     else:
         loader = TextLoader(filepath)
 
     docs = loader.load()
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
-    splits = text_splitter.split_documents(docs)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    splits = splitter.split_documents(docs)
+    return splits
 
+
+def create_rag_chain(splits):
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
     retriever = vectorstore.as_retriever()
@@ -60,28 +54,23 @@ Helpful Answer:"""
     return chain
 
 
-# Initialize RAG Chain
-rag_chain = init_rag_chain()
+# Load RayOptics.pdf and build RAG Chain
+print("⏳ Initializing AI Study Buddy vector store...")
+splits = load_and_split("RayOptics.pdf")
+rag_chain = create_rag_chain(splits)
+print("✅ Study Buddy Gradio App is Ready!")
 
-# Initialize Chat History in Session State
-if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "assistant", "content": "Hello! Ask me any question related to the Ray Optics document!"}
-    ]
 
-# Display Chat History
-for msg in st.session_state.messages:
-    st.chat_message(msg["role"]).write(msg["content"])
+def respond(message, history):
+    return rag_chain.invoke(message)
 
-# User Question Input
-if prompt := st.chat_input("Ask a question about Ray Optics..."):
-    # Store and display user message
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    st.chat_message("user").write(prompt)
 
-    # Generate and display AI Study Buddy response
-    with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
-            answer = rag_chain.invoke(prompt)
-            st.write(answer)
-            st.session_state.messages.append({"role": "assistant", "content": answer})
+demo = gr.ChatInterface(
+    fn=respond,
+    title="📚 AI Study Buddy - Ray Optics 🎓",
+    description="Ask any question regarding the Ray Optics study material!",
+    textbox=gr.Textbox(placeholder="Ask a question regarding Ray Optics...")
+)
+
+if __name__ == "__main__":
+    demo.launch(share=True)

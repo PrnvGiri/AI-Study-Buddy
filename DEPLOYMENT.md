@@ -1,35 +1,23 @@
-# ☁️ Deployment Guide: Streamlit
+# ☁️ Deployment Guide: Hugging Face Spaces (Gradio)
 
-This guide outlines step-by-step instructions for deploying your **AI Study Buddy** Streamlit web application.
-
----
-
-## 🌟 Method 1: Streamlit Community Cloud (Recommended - 100% Free ⭐)
-
-Streamlit offers official **100% free hosting** for Streamlit apps directly from GitHub.
-
-### Step-by-Step Instructions:
-1. Go to **[share.streamlit.io](https://share.streamlit.io)** and log in with your **GitHub account**.
-2. Click **New app**.
-3. Select your repository: `PrnvGiri/AI-Study-Buddy`, Branch: `main`, Main file path: `app.py`.
-4. Click **Advanced settings** -> **Secrets** and add:
-   ```toml
-   GROQ_API_KEY = "your_actual_groq_api_key_here"
-   ```
-5. Click **Deploy!** Your app will be live at a free URL: `https://ai-study-buddy.streamlit.app`.
+This guide outlines step-by-step instructions for deploying the **AI Study Buddy** Gradio web application for free.
 
 ---
 
-## ⚡ Method 2: Render Deployment
+## 🛠️ Option 1: Hugging Face Spaces (Recommended for Gradio)
 
-If deploying to **Render**:
+### Step 1: Create a Space
+1. Go to [Hugging Face Spaces](https://huggingface.co/spaces) and log in.
+2. Click **Create new Space**.
+3. Configure settings:
+   - **Space Name**: `ai-study-buddy`
+   - **SDK**: Select **Gradio**
+   - **Hardware**: **CPU Basic (Free)**
 
-| Setting | Value |
-| :--- | :--- |
-| **Runtime** | `Python 3` |
-| **Build Command** | `pip install -r requirements.txt` |
-| **Start Command** | `streamlit run app.py --server.port $PORT --server.address 0.0.0.0` |
+### Step 2: Add Files & Secret Key
+1. Upload/Sync your repository files: `app.py`, `RayOptics.pdf`, `requirements.txt`.
+2. Go to **Settings -> Secrets**:
+   - Add Secret Name: `GROQ_API_KEY`
+   - Add Secret Value: `your_actual_groq_api_key_here`
 
-### Environment Variable:
-- **Key**: `GROQ_API_KEY`
-- **Value**: `your_actual_groq_api_key_here`
+Your app will automatically build and launch at `https://huggingface.co/spaces/your-username/ai-study-buddy`.

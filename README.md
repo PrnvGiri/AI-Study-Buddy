@@ -2,7 +2,7 @@
 
 An interactive **Retrieval-Augmented Generation (RAG)** application that converts any document (PDF or Text) into a personalized AI Study Buddy. 
 
-Built with **LangChain**, **Chroma DB**, **Groq LLM (LLaMA 3.3)**, and **Streamlit**.
+Built with **LangChain**, **Chroma DB**, **Groq LLM (LLaMA 3.3)**, and **Gradio**.
 
 ---
 
@@ -10,14 +10,16 @@ Built with **LangChain**, **Chroma DB**, **Groq LLM (LLaMA 3.3)**, and **Streaml
 - **Document Chunking & Vector Search**: Uses `RecursiveCharacterTextSplitter` and `Chroma DB` for fast semantic retrieval.
 - **Fast Inference**: Powered by Groq's high-speed LLaMA 3.3 70B model.
 - **Local Embeddings**: Uses HuggingFace `all-MiniLM-L6-v2` embeddings locally.
-- **Streamlit Web UI**: Interactive chat interface with session history and resource caching.
+- **Dual Interface**:
+  - **Gradio Web App**: [`app.py`](app.py) for interactive web interface (`demo.launch(share=True)`).
+  - **CLI Script**: [`study_buddy.py`](study_buddy.py) for simple command-line querying.
 
 ---
 
 ## 📁 Repository Structure
 ```
 .
-├── app.py                         # Streamlit Web Application
+├── app.py                         # Gradio Web Application
 ├── study_buddy.py                 # Simple CLI RAG Script
 ├── RayOptics.pdf                  # Target Document Context
 ├── requirements.txt               # Dependencies list
@@ -39,22 +41,28 @@ pip install -r requirements.txt
 ```
 
 ### 2. Set your Groq API Key
-Copy `.env.example` to `.env` and add your key:
+Copy `.env.example` to `.env`:
 ```bash
 cp .env.example .env
 ```
-Inside `.env`:
+Add your key inside `.env`:
 ```env
-GROQ_API_KEY=your_groq_api_key_here
+GROQ_API_KEY="your_groq_api_key"
 ```
 
-### 3. Run the Streamlit App
-```bash
-streamlit run app.py
-```
-Open `http://localhost:8501` in your web browser.
+### 3. Run the App
+- **Gradio Web Interface**:
+  ```bash
+  python app.py
+  ```
+  Generates both local URL (`http://127.0.0.1:7860`) and a free public share URL (`https://xxxx.gradio.live`).
+
+- **Command Line (CLI)**:
+  ```bash
+  python study_buddy.py
+  ```
 
 ---
 
-## ☁️ Free Deployment
-For step-by-step instructions on how to deploy this application for free, check out the **[DEPLOYMENT.md](DEPLOYMENT.md)** guide.
+## ☁️ Deployment
+For instructions on deploying this application for free on Hugging Face Spaces or Render, check out the **[DEPLOYMENT.md](DEPLOYMENT.md)** guide.

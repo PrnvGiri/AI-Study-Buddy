@@ -1,5 +1,5 @@
-# Streamlit Web App
-streamlit
+# Gradio UI
+gradio
 
 # LangChain & AI Integrations
 langchain
